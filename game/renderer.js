@@ -102,9 +102,9 @@ function renderYSorted(ctx, players, map, drawStartX, drawEndX, drawStartY, draw
                 ctx.drawImage(
                     image,
                     Math.round(x * tileSize - camera.x),
-                    Math.round(y * tileSize - camera.y),
+                    Math.round((y - 0.5) * tileSize - camera.y), // Render tree a bit higher
                     tileSize,
-                    tileSize
+                    tileSize * 1.5 // Make tree taller
                 );
             }
         }

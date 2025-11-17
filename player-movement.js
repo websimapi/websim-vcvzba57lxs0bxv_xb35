@@ -65,8 +65,8 @@ export function updateMoveToTarget(player, deltaTime, gameMap) {
         let nextPixelY = player.pixelY + moveY;
 
         const playerBox = {
-            x: nextPixelX - player.hitbox.width / 2 + 0.5,
-            y: nextPixelY - player.hitbox.height / 2 + 0.5,
+            x: nextPixelX - player.hitbox.width / 2,
+            y: nextPixelY - player.hitbox.height / 2,
             width: player.hitbox.width,
             height: player.hitbox.height,
         };
@@ -79,14 +79,14 @@ export function updateMoveToTarget(player, deltaTime, gameMap) {
         } else {
             // Collision detected, attempt to slide
             // Try moving only on X axis
-            const xBox = { ...playerBox, y: player.pixelY - player.hitbox.height / 2 + 0.5 };
+            const xBox = { ...playerBox, y: player.pixelY - player.hitbox.height / 2 };
             if (!gameMap.checkCollision(xBox).collided) {
                 player.pixelX = nextPixelX;
                  // Stop Y movement
             }
 
             // Try moving only on Y axis
-            const yBox = { ...playerBox, x: player.pixelX - player.hitbox.width / 2 + 0.5 };
+            const yBox = { ...playerBox, x: player.pixelX - player.hitbox.width / 2 };
             if (!gameMap.checkCollision(yBox).collided) {
                 player.pixelY = nextPixelY;
                  // Stop X movement
@@ -132,8 +132,8 @@ export function applySeparation(player, allPlayers, gameMap) {
         const newPixelY = player.pixelY + avgPushY;
         
         const playerBox = {
-             x: newPixelX - player.hitbox.width / 2 + 0.5,
-             y: newPixelY - player.hitbox.height / 2 + 0.5,
+             x: newPixelX - player.hitbox.width / 2,
+             y: newPixelY - player.hitbox.height / 2,
              width: player.hitbox.width,
              height: player.hitbox.height
         };
@@ -144,11 +144,11 @@ export function applySeparation(player, allPlayers, gameMap) {
             player.pixelY = newPixelY;
         } else {
             // If pushing into a wall, try pushing only along one valid axis
-             const xBox = { ...playerBox, y: player.pixelY - player.hitbox.height / 2 + 0.5 };
+             const xBox = { ...playerBox, y: player.pixelY - player.hitbox.height / 2 };
             if (!gameMap.checkCollision(xBox).collided) {
                 player.pixelX = newPixelX;
             }
-             const yBox = { ...playerBox, x: player.pixelX - player.hitbox.width / 2 + 0.5 };
+             const yBox = { ...playerBox, x: player.pixelX - player.hitbox.width / 2 };
             if (!gameMap.checkCollision(yBox).collided) {
                 player.pixelY = newPixelY;
             }
