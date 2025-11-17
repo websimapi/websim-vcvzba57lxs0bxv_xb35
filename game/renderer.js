@@ -71,7 +71,9 @@ function renderYSorted(ctx, players, map, drawStartX, drawEndX, drawStartY, draw
         if (player.isPowered()) {
             renderList.push({
                 type: 'player',
-                y: player.pixelY,
+                // Use the player's "feet" for sorting to handle tree overlaps correctly.
+                // The player's origin is their center, so we add a small offset downwards.
+                y: player.pixelY + 0.25, 
                 entity: player,
             });
         }
