@@ -74,8 +74,30 @@ export function updateAction(player, deltaTime, gameMap, allPlayers, game) {
                 startChoppingCycle(player, gameMap);
                 return;
             }
+            
+            // First, move along the path
+            updateFollowPath(player, deltaTime, gameMap);
 
-            if (atMoveTarget && player.finalMoveTarget) {
+            // After moving, check for collision with the target tree
+            const playerBox = {
+                x: player.pixelX + 0.5 - player.hitbox.width / 2,
+                y: player.pixelY + 0.5 - player.hitbox.height / 2,
+                width: player.hitbox.width,
+                height: player.hitbox.height
+            };
+            const treeHitbox = gameMap.getTreeHitbox(player.actionTarget.x, player.actionTarget.y);
+            
+            const isColliding = treeHitbox &&
+                playerBox.x < treeHitbox.x + treeHitbox.width &&
+                playerBox.x + playerBox.width > treeHitbox.x &&
+                playerBox.y < treeHitbox.y + treeHitbox.height &&
+                playerBox.y + playerBox.height > treeHitbox.y;
+
+            if (isColliding) {
+                player.path = []; // Stop moving
+                player.finalMoveTarget = null;
+                beginChopping(player, gameMap, game);
+            } else if (atMoveTarget && player.finalMoveTarget) {
                 // Path is complete, now do the final move to the hitbox edge
                 player.targetX = player.finalMoveTarget.x;
                 player.targetY = player.finalMoveTarget.y;
@@ -89,8 +111,6 @@ export function updateAction(player, deltaTime, gameMap, allPlayers, game) {
                     player.finalMoveTarget = null;
                     beginChopping(player, gameMap, game);
                 }
-            } else {
-                updateFollowPath(player, deltaTime, gameMap);
             }
             break;
         case PLAYER_STATE.MOVING_TO_LOGS:
