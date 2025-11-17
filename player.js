@@ -63,6 +63,7 @@ export class Player {
         this.targetX = 0;
         this.targetY = 0;
         this.path = []; // Path for A* movement
+        this.finalMoveTarget = null; // For precise non-grid final positions
 
         // Player's collision hitbox dimensions (in grid units)
         this.hitbox = { width: 0.5, height: 0.5 };
@@ -147,6 +148,7 @@ export class Player {
             pixelX: this.pixelX,
             pixelY: this.pixelY,
             path: this.path,
+            finalMoveTarget: this.finalMoveTarget,
             inventory: this.inventory.getState(),
             state: this.state,
             actionTarget: this.actionTarget, // Save the action target
@@ -176,6 +178,7 @@ export class Player {
         }
         
         this.path = state.path || [];
+        this.finalMoveTarget = state.finalMoveTarget || null;
 
         // Load visual offset
         if (state.offsetX !== undefined && state.offsetY !== undefined) {
@@ -253,6 +256,7 @@ export class Player {
             this.state = PLAYER_STATE.IDLE;
             this.actionTarget = null;
             this.path = [];
+            this.finalMoveTarget = null;
             return; // Exit validation early as state has been reset
         }
 
@@ -279,6 +283,7 @@ export class Player {
                 this.state = PLAYER_STATE.IDLE;
                 this.actionTarget = null;
                 this.path = []; // Clear the path as well
+                this.finalMoveTarget = null;
             } else {
                 if (this.state === PLAYER_STATE.CHOPPING) {
                     console.log(`[${this.username}] Re-initializing chopping state on load.`);
@@ -304,6 +309,7 @@ export class Player {
                         this.state = PLAYER_STATE.IDLE;
                         this.actionTarget = null;
                         this.path = [];
+                        this.finalMoveTarget = null;
                     }
                 }
             }

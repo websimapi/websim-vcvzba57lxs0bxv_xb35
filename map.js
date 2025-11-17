@@ -16,6 +16,19 @@ export class Map {
         this.viewportHeight = 0;
     }
 
+    getTreeHitbox(treeX, treeY) {
+        const hitboxWidth = 1 / 8;
+        const hitboxHeight = 1 / 2;
+        const offsetX = (1 - hitboxWidth) / 2;
+        const offsetY = 1 - hitboxHeight;
+        return {
+            x: treeX + offsetX,
+            y: treeY + offsetY,
+            width: hitboxWidth,
+            height: hitboxHeight,
+        };
+    }
+
     setViewport(width, height) {
         this.viewportWidth = width;
         this.viewportHeight = height;
@@ -44,20 +57,10 @@ export class Map {
     
     updateTreeHitboxes() {
         this.treeHitboxes = [];
-        const hitboxWidth = 1 / 8;
-        const hitboxHeight = 1 / 2;
-        const offsetX = (1 - hitboxWidth) / 2; // Center the hitbox
-        const offsetY = 1 - hitboxHeight; // Place hitbox at the bottom
-
         for (let j = 0; j < this.height; j++) {
             for (let i = 0; i < this.width; i++) {
                 if (this.grid[j][i] === TILE_TYPE.TREE) {
-                    this.treeHitboxes.push({
-                        x: i + offsetX,
-                        y: j + offsetY,
-                        width: hitboxWidth,
-                        height: hitboxHeight,
-                    });
+                    this.treeHitboxes.push(this.getTreeHitbox(i, j));
                 }
             }
         }

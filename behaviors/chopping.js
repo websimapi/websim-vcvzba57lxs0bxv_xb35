@@ -27,6 +27,7 @@ export function findAndMoveToTree(player, gameMap) {
         
         let bestPath = null;
         let minPathLength = Infinity;
+        let finalTargetPoint = null;
 
         // Find best path to an adjacent spot
         for(let dx = -1; dx <= 1; dx++) {
@@ -48,6 +49,22 @@ export function findAndMoveToTree(player, gameMap) {
                     if (path && path.length < minPathLength) {
                         minPathLength = path.length;
                         bestPath = path;
+
+                        // Calculate the point on the hitbox edge to move to
+                        const hitbox = gameMap.getTreeHitbox(treeCoords.x, treeCoords.y);
+                        if (hitbox) {
+                             // Player hitbox is 0.5x0.5, so we need to account for half of it
+                            const playerRadiusX = player.hitbox.width / 2;
+                            const playerRadiusY = player.hitbox.height / 2;
+                            
+                            // Clamp the player's center to the hitbox edges
+                            const targetPixelX = Math.max(hitbox.x - playerRadiusX, Math.min(spotX + 0.5, hitbox.x + hitbox.width + playerRadiusX));
+                            const targetPixelY = Math.max(hitbox.y - playerRadiusY, Math.min(spotY + 0.5, hitbox.y + hitbox.height + playerRadiusY));
+                            
+                            finalTargetPoint = { x: targetPixelX, y: targetPixelY };
+                        } else {
+                            finalTargetPoint = { x: spotX + 0.5, y: spotY + 0.5 }; // Fallback
+                        }
                     }
                 }
             }
@@ -56,6 +73,7 @@ export function findAndMoveToTree(player, gameMap) {
         if(bestPath) {
            player.actionTarget = treeCoords;
            player.path = bestPath;
+           player.finalMoveTarget = finalTargetPoint;
            player.state = PLAYER_STATE.MOVING_TO_TREE;
            console.log(`[${player.username}] Found pathable tree at (${treeCoords.x}, ${treeCoords.y}). Moving to chop.`);
            pathFound = true;

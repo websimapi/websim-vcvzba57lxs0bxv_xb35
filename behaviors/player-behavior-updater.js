@@ -70,36 +70,27 @@ export function updateAction(player, deltaTime, gameMap, allPlayers, game) {
         case PLAYER_STATE.MOVING_TO_TREE:
             if (!player.actionTarget || gameMap.grid[player.actionTarget.y][player.actionTarget.x] !== TILE_TYPE.TREE) {
                 console.log(`[${player.username}] Target tree at (${player.actionTarget?.x}, ${player.actionTarget?.y}) is gone. Finding a new one.`);
+                player.finalMoveTarget = null;
                 startChoppingCycle(player, gameMap);
                 return;
             }
-            updateFollowPath(player, deltaTime, gameMap);
-            
-            // Check for proximity to start chopping
-            const dx = player.pixelX - player.actionTarget.x;
-            const dy = player.pixelY - player.actionTarget.y;
-            const distSq = dx * dx + dy * dy;
-            const interactionDistSq = 1.5 * 1.5; // Within 1.5 tiles
-            
-            if (distSq < interactionDistSq) {
-                // Check if movement is blocked by any obstacle (presumably the target tree)
-                const moveX = player.targetX - player.pixelX;
-                const moveY = player.targetY - player.pixelY;
+
+            if (atMoveTarget && player.finalMoveTarget) {
+                // Path is complete, now do the final move to the hitbox edge
+                player.targetX = player.finalMoveTarget.x;
+                player.targetY = player.finalMoveTarget.y;
+                updateMoveToTarget(player, deltaTime, gameMap);
                 
-                // If the player is very close to their movement target, they are not blocked
-                const isAtTarget = Math.sqrt(moveX*moveX + moveY*moveY) < 0.1;
+                const dxFinal = player.finalMoveTarget.x - player.pixelX;
+                const dyFinal = player.finalMoveTarget.y - player.pixelY;
+                const distFinalSq = dxFinal * dxFinal + dyFinal * dyFinal;
 
-                if (!isAtTarget && Math.abs(moveX) < 0.01 && Math.abs(moveY) < 0.01) {
-                    // Player is trying to move but isn't making progress, they must be blocked
-                    console.log(`[${player.username}] Movement to tree blocked, close enough to chop.`);
+                if (distFinalSq < 0.01 * 0.01) { // Reached final target
+                    player.finalMoveTarget = null;
                     beginChopping(player, gameMap, game);
-                    return;
                 }
-            }
-
-            if (atMoveTarget) {
-                // The player has reached the adjacent tile. Start chopping.
-                beginChopping(player, gameMap, game);
+            } else {
+                updateFollowPath(player, deltaTime, gameMap);
             }
             break;
         case PLAYER_STATE.MOVING_TO_LOGS:
