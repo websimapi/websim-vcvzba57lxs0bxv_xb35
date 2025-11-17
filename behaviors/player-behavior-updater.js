@@ -78,7 +78,7 @@ export function updateAction(player, deltaTime, gameMap, allPlayers, game) {
             // First, move along the path
             updateFollowPath(player, deltaTime, gameMap);
 
-            // After moving, check for collision with the target tree
+            // After moving, check for collision with the target tree's hitbox
             const playerBox = {
                 x: player.pixelX - player.hitbox.width / 2,
                 y: player.pixelY - player.hitbox.height / 2,
@@ -97,19 +97,27 @@ export function updateAction(player, deltaTime, gameMap, allPlayers, game) {
                 player.path = []; // Stop moving
                 player.finalMoveTarget = null;
                 beginChopping(player, gameMap, game);
-            } else if (atMoveTarget && player.finalMoveTarget) {
-                // Path is complete, now do the final move to the hitbox edge
-                player.targetX = player.finalMoveTarget.x;
-                player.targetY = player.finalMoveTarget.y;
-                updateMoveToTarget(player, deltaTime, gameMap);
+            } else if (atMoveTarget) {
+                 // Path is complete, but we haven't hit the tree yet.
+                 // This can happen if path ends one tile away. Let's try to move directly to the tree.
+                 // If that also fails, the player is blocked, and we need to find a new tree.
+                if (player.finalMoveTarget) {
+                    player.targetX = player.finalMoveTarget.x;
+                    player.targetY = player.finalMoveTarget.y;
+                    updateMoveToTarget(player, deltaTime, gameMap);
                 
-                const dxFinal = player.finalMoveTarget.x - player.pixelX;
-                const dyFinal = player.finalMoveTarget.y - player.pixelY;
-                const distFinalSq = dxFinal * dxFinal + dyFinal * dyFinal;
+                    const dxFinal = player.finalMoveTarget.x - player.pixelX;
+                    const dyFinal = player.finalMoveTarget.y - player.pixelY;
+                    const distFinalSq = dxFinal * dxFinal + dyFinal * dyFinal;
 
-                if (distFinalSq < 0.01 * 0.01) { // Reached final target
-                    player.finalMoveTarget = null;
-                    beginChopping(player, gameMap, game);
+                    if (distFinalSq < 0.01 * 0.01) { // Reached final target, should be colliding now.
+                        player.finalMoveTarget = null;
+                        // We give one more frame for collision to register before giving up.
+                    }
+                } else {
+                    // Path is done and we have no final target, which means we can't get closer.
+                    console.log(`[${player.username}] Reached end of path for tree at (${player.actionTarget.x}, ${player.actionTarget.y}) but not colliding. Path may be blocked. Finding a new tree.`);
+                    startChoppingCycle(player, gameMap);
                 }
             }
             break;

@@ -61,36 +61,29 @@ export function updateMoveToTarget(player, deltaTime, gameMap) {
         const moveX = (dx / dist) * moveAmount;
         const moveY = (dy / dist) * moveAmount;
 
-        let nextPixelX = player.pixelX + moveX;
-        let nextPixelY = player.pixelY + moveY;
+        let intendedX = player.pixelX + moveX;
+        let intendedY = player.pixelY + moveY;
 
-        const playerBox = {
-            x: nextPixelX - player.hitbox.width / 2,
-            y: nextPixelY - player.hitbox.height / 2,
+        // Check X-axis movement
+        const xBox = {
+            x: intendedX - player.hitbox.width / 2,
+            y: player.pixelY - player.hitbox.height / 2,
             width: player.hitbox.width,
             height: player.hitbox.height,
         };
+        if (!gameMap.checkCollision(xBox).collided) {
+            player.pixelX = intendedX;
+        }
 
-        const collision = gameMap.checkCollision(playerBox);
-
-        if (!collision.collided) {
-            player.pixelX = nextPixelX;
-            player.pixelY = nextPixelY;
-        } else {
-            // Collision detected, attempt to slide
-            // Try moving only on X axis
-            const xBox = { ...playerBox, y: player.pixelY - player.hitbox.height / 2 };
-            if (!gameMap.checkCollision(xBox).collided) {
-                player.pixelX = nextPixelX;
-                 // Stop Y movement
-            }
-
-            // Try moving only on Y axis
-            const yBox = { ...playerBox, x: player.pixelX - player.hitbox.width / 2 };
-            if (!gameMap.checkCollision(yBox).collided) {
-                player.pixelY = nextPixelY;
-                 // Stop X movement
-            }
+        // Check Y-axis movement, using the (potentially) updated X position
+        const yBox = {
+            x: player.pixelX - player.hitbox.width / 2,
+            y: intendedY - player.hitbox.height / 2,
+            width: player.hitbox.width,
+            height: player.hitbox.height,
+        };
+        if (!gameMap.checkCollision(yBox).collided) {
+            player.pixelY = intendedY;
         }
     } else {
         player.pixelX = player.targetX;
