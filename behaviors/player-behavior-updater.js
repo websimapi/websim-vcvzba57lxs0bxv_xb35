@@ -80,8 +80,8 @@ export function updateAction(player, deltaTime, gameMap, allPlayers, game) {
 
             // After moving, check for collision with the target tree
             const playerBox = {
-                x: player.pixelX + 0.5 - player.hitbox.width / 2,
-                y: player.pixelY + 0.5 - player.hitbox.height / 2,
+                x: player.pixelX - player.hitbox.width / 2,
+                y: player.pixelY - player.hitbox.height / 2,
                 width: player.hitbox.width,
                 height: player.hitbox.height
             };
